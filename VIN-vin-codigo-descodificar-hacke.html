@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador e Descobridor de VIN Mercedes-Benz Real</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #00adef;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #bbb;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            background-color: #2b2b2b;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        select:focus, input:focus {
+            border-color: #00adef;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #00adef;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #008cc2;
+        }
+        .resultado-container {
+            margin-top: 30px;
+            display: none;
+        }
+        .resultado-title {
+            font-size: 18px;
+            color: #00adef;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background-color: #181818;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2d2d2d;
+        }
+        th {
+            background-color: #252525;
+            color: #00adef;
+        }
+        .original-row {
+            background-color: rgba(0, 173, 239, 0.15);
+            font-weight: bold;
+            color: #00adef;
+        }
+        .vin-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+        .digito-destaque {
+            color: #ff5252;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mercedes-Benz VIN Finder</h1>
+    
+    <div class="form-group">
+        <label for="modelo">1. Selecione o Modelo / Classe:</label>
+        <select id="modelo">
+            <option value="W1K" data-vds="ZF8DB" data-fab="L">Classe E Sedan (W213) [Modelo Original]</option>
+            <option value="WDD" data-vds="177084" data-fab="J">Classe A Hatchback (W177)</option>
+            <option value="W1K" data-vds="206042" data-fab="F">Classe C Sedan (W206)</option>
+            <option value="W1K" data-vds="223076" data-fab="L">Classe S Luxo (W223)</option>
+            <option value="W1K" data-vds="254146" data-fab="F">GLC SUV (X254)</option>
+            <option value="4JG" data-vds="167159" data-fab="A">GLE SUV (V167)</option>
+            <option value="WDD" data-vds="118384" data-fab="N">CLA Coupe (C118)</option>
+            <option value="W1K" data-vds="192381" data-fab="L">Mercedes-AMG GT (C192)</option>
+            <option value="W1K" data-vds="295112" data-fab="L">EQE Sedan Elétrico (V295)</option>
+            <option value="4JG" data-vds="296123" data-fab="A">EQS SUV Elétrico (X296)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="ano">2. Selecione o Ano de Fabrico:</label>
+        <select id="ano">
+            <option value="A">2010</option>
+            <option value="B">2011</option>
+            <option value="C">2012</option>
+            <option value="D">2013</option>
+            <option value="E">2014</option>
+            <option value="F">2015</option>
+            <option value="G">2016</option>
+            <option value="H">2017</option>
+            <option value="J">2018</option>
+            <option value="K">2019</option>
+            <option value="L" selected>2020</option>
+            <option value="M">2021</option>
+            <option value="N">2022</option>
+            <option value="P">2023</option>
+            <option value="R">2024</option>
+            <option value="S">2025</option>
+            <option value="T">2026</option>
+            <option value="V">2027</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="sequencia">3. Sequência de Produção Alvo (6 dígitos):</label>
+        <input type="number" id="sequencia" value="811080" min="0" max="999999">
+    </div>
+
+    <button onclick="gerarVinsReais()">Calcular e Validar VINs Reais</button>
+
+    <div class="resultado-container" id="resultadoDiv">
+        <div class="resultado-title" id="resultadoTitulo">Códigos Gerados com Sucesso:</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Código VIN Válido Oficial</th>
+                    <th>Dígito Verificador Calculado</th>
+                </tr>
+            </thead>
+            <tbody id="tabelaCorpo">
+                <!-- Resultados inseridos aqui -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function calcularModulo11(v) {
+        // Tabela de conversão de caracteres para valores numéricos
+        var letras = {"A":1,"B":2,"C":3,"D":4,"E":5,"F":6,"G":7,"H":8,"J":1,"K":2,"L":3,"M":4,"N":5,"P":7,"R":9,"S":2,"T":3,"U":4,"V":5,"W":6,"X":7,"Y":8,"Z":9,"1":1,"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"0":0};
+        
+        // Multiplicadores da norma ISO 3779 por posição (1 a 17)
+        var s = 0;
+        s += (letras[v.charAt(0)] || 0) * 8;
+        s += (letras[v.charAt(1)] || 0) * 7;
+        s += (letras[v.charAt(2)] || 0) * 6;
+        s += (letras[v.charAt(3)] || 0) * 5;
+        s += (letras[v.charAt(4)] || 0) * 4;
+        s += (letras[v.charAt(5)] || 0) * 3;
+        s += (letras[v.charAt(6)] || 0) * 2;
+        s += (letras[v.charAt(7)] || 0) * 10;
+        // Posição 9 (índice 8) é pulada
+        s += (letras[v.charAt(9)] || 0) * 9;
+        s += (letras[v.charAt(10)] || 0) * 8;
+        s += (letras[v.charAt(11)] || 0) * 7;
+        s += (letras[v.charAt(12)] || 0) * 6;
+        s += (letras[v.charAt(13)] || 0) * 5;
+        s += (letras[v.charAt(14)] || 0) * 4;
+        s += (letras[v.charAt(15)] || 0) * 3;
+        s += (letras[v.charAt(16)] || 0) * 2;
+        
+        var resto = s % 11;
+        if (resto === 10) return 'X';
+        return resto.toString();
+    }
+
+    function gerarVinsReais() {
+        var menuMod = document.getElementById('modelo');
+        var optSel = menuMod.options[menuMod.selectedIndex];
+        
+        var wmi = menuMod.value;
+        var vds = optSel.getAttribute('data-vds');
+        var fab = optSel.getAttribute('data-fab');
+        
+        var menuAno = document.getElementById('ano');
+        var anoCod = menuAno.value;
+        var anoTxt = menuAno.options[menuAno.selectedIndex].text;
+        var modTxt = optSel.text;
+        
+        var seqInt = parseInt(document.getElementById('sequencia').value);
+        if (isNaN(seqInt) || seqInt < 0 || seqInt > 999999) {
+            alert("Insira uma sequência válida.");
+            return;
+        }
+
+        var corpo = document.getElementById('tabelaCorpo');
+        corpo.innerHTML = ""; 
+
+        for (var d = -5; d <= 5; d++) {
+            var atual = seqInt + d;
+            if (atual >= 0 && atual <= 999999) {
+                var txtChassis = atual.toString().padStart(6, '0');
+                
+                // Monta a base com um '0' temporário na posição 9
+                var base = wmi + vds + "0" + anoCod + fab + txtChassis;
+                var digito = calcularModulo11(base);
+                
+                // Substitui o caractere do índice 8 pelo dígito correto calculado
+                var vinFinal = base.substring(0, 8) + digito + base.substring(9);
+                
+                var rotulo = "Vizinho [" + (d > 0 ? "+" + d : d) + "]";
+                if (d === 0) rotulo = "=> ORIGINAL REAL";
+
+                var tr = document.createElement('tr');
+                if (d === 0) tr.className = "original-row";
+
+                var visual = vinFinal.substring(0, 8) + '<span class="digito-destaque">' + digito + '</span>' + vinFinal.substring(9);
+
+                tr.innerHTML = '<td>' + rotulo + '</td><td class="vin-text">' + visual + '</td><td>Posição 9: <strong>\'' + digito + '\'</strong></td>';
+                corpo.appendChild(tr);
+            }
+        }
+
+        document.getElementById('resultadoTitulo').textContent = "Códigos Reais Calculados para: " + modTxt + " (" + anoTxt + ")";
+        document.getElementById('resultadoDiv').style.display = "block";
+    }
+</script>
+
+</body>
+</html>
+
+
