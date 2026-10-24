@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Links Profundos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f4f9;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef;
+            border-left: 5px solid #007bff;
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🔗 Deep Link Generator</h1>
+        
+        <label for="parentLink">Link Pai (Base URL):</label>
+        <input type="text" id="parentLink" placeholder="Ex: https://google.com" value="https://google.com">
+
+        <label for="deepOption">Opção de Pesquisa Profunda:</label>
+        <select id="deepOption">
+            <!-- Operadores Reais de Busca Avançada -->
+            <option value="/search?q=site:gov+OR+site:edu+&quot;pesquisa+cientifica&quot;">Busca Acadêmica/Governamental Avançada</option>
+            <option value="/search?q=filetype:pdf+&quot;relatorio+completo&quot;">Filtro por Documentos Profundos (PDF)</option>
+            <option value="/search?q=tbs=qdr:m&q=noticias+recentes">Indexação Cronológica (Último Mês)</option>
+            <!-- Padrões de Busca Profunda para IAs e Motores -->
+            <option value="?hints=search&q=analise+profunda">Parâmetro de Agente de Busca IA (Deep Research)</option>
+            <option value="/search?mode=deep&q=investigacao">Modo Analítico Estruturado</option>
+            <option value="" disabled>--- Personalizado ---</option>
+            <option value="custom">Inserir manualmente (abaixo)</option>
+        </select>
+
+        <label id="customLabel" style="display:none;">Caminho Personalizado:</label>
+        <input type="text" id="customPath" placeholder="/seu-caminho-personalizado" style="display:none;">
+
+        <button onclick="openDeepLink()">Abrir Link Profundo 🪟</button>
+
+        <div class="info">
+            <strong>Como funciona:</strong><br>
+            1. Insira o link base no campo "Link Pai" (Ex: Google, Bing, etc).<br>
+            2. Escolha uma opção no menu ou selecione "Inserir manualmente".<br>
+            3. Clique em "Abrir Link Profundo" para carregar a pesquisa em uma janela GUI nativa dedicada e isolada.
+        </div>
+    </div>
+
+    <script>
+        // Função para mostrar/esconder campo personalizado
+        const optionSelect = document.getElementById('deepOption');
+        const customPathInput = document.getElementById('customPath');
+        const customLabel = document.getElementById('customLabel');
+
+        optionSelect.addEventListener('change', () => {
+            if (optionSelect.value === 'custom') {
+                customPathInput.style.display = 'block';
+                customLabel.style.display = 'block';
+            } else {
+                customPathInput.style.display = 'none';
+                customLabel.style.display = 'none';
+            }
+        });
+
+        function openDeepLink() {
+            const parentUrl = document.getElementById('parentLink').value.trim();
+            const selectedOption = document.getElementById('deepOption').value;
+            let finalPath = '';
+
+            // Validação do link pai
+            if (!parentUrl) {
+                alert('Por favor, insira um Link Pai!');
+                return;
+            }
+
+            // Lógica de construção do URL
+            if (selectedOption === 'custom') {
+                finalPath = document.getElementById('customPath').value.trim();
+                if (!finalPath) {
+                    alert('Insira um caminho personalizado!');
+                    return;
+                }
+            } else {
+                finalPath = selectedOption;
+            }
+
+            // Normalização: garante a junção correta dos caminhos
+            const cleanParent = parentUrl.trim().replace(/\/+$/, '');
+            let targetUrl = '';
+            
+            if (finalPath.startsWith('?') || finalPath.startsWith('/')) {
+                targetUrl = cleanParent + (finalPath.startsWith('?') ? '/' + finalPath : finalPath);
+            } else {
+                targetUrl = cleanParent + '/' + finalPath;
+            }
+
+            console.log("Abrindo na Janela GUI Real:", targetUrl);
+
+            // Configurações para forçar o navegador a criar uma janela GUI separada (Pop-up independente)
+            const width = 1000;
+            const height = 750;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+
+            // Atributos como 'popup=yes', dimensões fixas e posições forçam o comportamento de aplicação desktop
+            const windowFeatures = `popup=yes,width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,status=no,toolbar=no,menubar=no,location=no`;
+
+            window.open(targetUrl, '_blank', windowFeatures);
+        }
+    </script>
+</body>
+</html>
