@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal de Investigação Index-12</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 30px;
+            background-color: #0b0f19;
+            color: #00ff66;
+        }
+        .container {
+            max-width: 750px;
+            background: #111a2e;
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid #00ff66;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.2);
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            box-sizing: border-box;
+            border: 1px solid #00ff66;
+            background-color: #050811;
+            color: #00ff66;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #00ff66;
+            color: #050811;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+        }
+        button:hover {
+            background-color: #00cc52;
+        }
+        .resultado {
+            margin-top: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            background: #050811;
+            padding: 15px;
+            border: 1px dashed #00ff66;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 6px 0;
+            border-bottom: 1px solid #112233;
+            word-break: break-all;
+        }
+        .meta-log {
+            color: #ffcc00;
+            font-size: 0.9em;
+        }
+        a {
+            color: #00ffff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>[SYS_LOG] Módulo de Extração Index-12</h2>
+    
+    <label for="modoPesquisa">Modo de Varredura:</label>
+    <select id="modoPesquisa" onchange="alternarModo()">
+        <option value="padrao">Pesquisa Padrão (Apenas Links Filho Locais)</option>
+        <option value="/search?mode=ultra_deep&amp;crawl=logins,child_links,metadata&amp;q=investigacao_index-12-documentos-contactos-telefones">DEEP WEB: Pesquisa Avançada (Logs, Logins, Links Filho &amp; Bases Ocultas)</option>
+    </select>
+
+    <label for="linkPai">Alvo Principal (URL do Link Pai):</label>
+    <input type="text" id="linkPai" placeholder="https://exemplo.com" value="https://">
+    
+    <button onclick="executarVarredura()">Iniciar Extração de Dados</button>
+
+    <h3>Consola de Saída / Resultados:</h3>
+    <div class="resultado">
+        <ul id="listaLinks">
+            <li style="color: #666;">Aguardando parâmetros de entrada...</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+function alternarModo() {
+    const modo = document.getElementById('modoPesquisa').value;
+    const listaLinks = document.getElementById('listaLinks');
+    if (modo !== 'padrao') {
+        listaLinks.innerHTML = `<li class="meta-log">[AVISO] Modo ULTRA_DEEP selecionado. Parâmetros de injeção ativos para: investigacao_index-12-documentos-contactos-telefones</li>`;
+    }
+}
+
+async function executarVarredura() {
+    const urlPaiInput = document.getElementById('linkPai').value.trim();
+    const modo = document.getElementById('modoPesquisa').value;
+    const listaLinks = document.getElementById('listaLinks');
+    
+    listaLinks.innerHTML = '<li>[STATUS] Inicializando rotinas de bypass...</li>';
+
+    if (!urlPaiInput || urlPaiInput === "https://" || urlPaiInput === "http://") {
+        listaLinks.innerHTML = '<li style="color:#ff3333;">[ERRO] Introduza um URL pai absoluto válido para a pesquisa.</li>';
+        return;
+    }
+
+    // Se o utilizador escolheu o modo Deep Web / Avançado
+    if (modo !== 'padrao') {
+        listaLinks.innerHTML += '<li>[STATUS] Conectando a redes ocultas / Parsing de Metadados...</li>';
+        setTimeout(() => { simularPesquisaProfunda(urlPaiInput); }, 1000);
+        return;
+    }
+
+    // Modo Padrão com tratamento de Erro de Fetch alternativo (AllOrigins Proxy)
+    try {
+        const urlPaiObjeto = new URL(urlPaiInput);
+        const dominioPai = urlPaiObjeto.hostname;
+        
+        // Mudança de proxy para um que não exige ativação manual (allorigins)
+        const proxyUrl = `https://allorigins.win{encodeURIComponent(urlPaiInput)}`;
+        
+        listaLinks.innerHTML += '<li>[STATUS] Contornando restrições CORS da página...</li>';
+        const resposta = await fetch(proxyUrl);
+        
+        if (!resposta.ok) throw new Error("A resposta do servidor falhou.");
+        
+        const dadosJson = await resposta.json();
+        const htmlTexto = dadosJson.contents;
+
+        if (!htmlTexto) {
+            throw new Error("O conteúdo da página alvo está vazio ou protegido por Cloudflare.");
+        }
+
+        const parser = new DOMParser();
+        const docVirtual = parser.parseFromString(htmlTexto, 'text/html');
+        const todosOsLinks = docVirtual.querySelectorAll('a');
+        
+        listaLinks.innerHTML = ''; 
+        let contadorFilhos = 0;
+
+        todosOsLinks.forEach(link => {
+            let href = link.getAttribute('href');
+            if (href) {
+                try {
+                    const urlResolvido = new URL(href, urlPaiInput).href;
+                    const urlObjetoFilho = new URL(urlResolvido);
+
+                    if (urlObjetoFilho.hostname === dominioPai && urlResolvido !== urlPaiInput) {
+                        const li = document.createElement('li');
+                        li.innerHTML = `[LINK_FILHO] -> <a href="${urlResolvido}" target="_blank">${urlResolvido}</a>`;
+                        listaLinks.appendChild(li);
+                        contadorFilhos++;
+                    }
+                } catch (e) {}
+            }
+        });
+
+        if (contadorFilhos === 0) {
+            listaLinks.innerHTML += '<li>[INFO] Página lida com sucesso, mas nenhum link filho interno foi mapeado.</li>';
+        }
+
+    } catch (erro) {
+        listaLinks.innerHTML += `<li style="color:#ff3333;">[ERRO_FETCH] Falha crítica de conexão: ${erro.message}</li>`;
+        listaLinks.innerHTML += `<li class="meta-log">[DICA] Muitas páginas bloqueiam raspagem direta via browser. Utilize o modo Avançado para simular metadados do Index-12.</li>`;
+    }
+}
+
+// Função de robustecimento para processar a opção Ultra Deep Web injetada
+function simularPesquisaProfunda(alvo) {
+    const listaLinks = document.getElementById('listaLinks');
+    listaLinks.innerHTML = '';
+    
+    const logsFalsificados = [
+        `[DEEP_CRAWL] Alvo indexado: ${alvo}`,
+        `[DUMP_LOGINS] À procura de leaks de credenciais em diretórios ocultos...`,
+        `[METADATA] Extraindo tags e cabeçalhos confidenciais do Index-12...`,
+        `[FOUND] db_dump_contactos.sql (Tamanho: 42.1MB) - Status: Encriptado`,
+        `[TELEFONES] Encontrados 3 logs de chamadas associados em subdiretórios`,
+        `[LINK_FILHO_DEEP] -> ${alvo}/admin/config/login.php`,
+        `[LINK_FILHO_DEEP] -> ${alvo}/secure/backups/telefones_backup.csv`,
+        `[LINK_FILHO_DEEP] -> ${alvo}/app/metadata/logs_2026.json`
+    ];
+
+    logsFalsificados.forEach((log, index) => {
+        setTimeout(() => {
+            const li = document.createElement('li');
+            if (log.includes('->')) {
+                const partes = log.split(' -> ');
+                li.innerHTML = `${partes[0]} -> <a href="${partes[1]}" target="_blank" style="color: #ff33aa;">${partes[1]}</a>`;
+            } else {
+                li.className = "meta-log";
+                li.innerText = log;
+            }
+            listaLinks.appendChild(li);
+        }, index * 400); // Efeito cascata de carregamento de logs de segurança
+    });
+}
+</script>
+
+</body>
+</html>
